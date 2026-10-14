@@ -75,6 +75,7 @@ The controller features distinct visual color states so you always know what the
 │
 ├── HyperRealismMasterAI.luau         # Unified autonomous AI controller & diagnostics
 ├── HyperRealismEngine.luau          # Graphics, PBR library & 3D procedural terrain
+├── DesertWarfareTransformer.luau    # Anti-Lego Military Warzone & Sand Dunes Transformer
 ├── HyperRealisticWeaponsEngine.luau  # Ballistics, spring recoil & surface reactions
 ├── ProceduralFullBodyIK.luau        # True First Person, Q/E lean & IK foot planting
 └── AdvancedTacticalSuite.luau       # Wallbang penetration & brass ejection

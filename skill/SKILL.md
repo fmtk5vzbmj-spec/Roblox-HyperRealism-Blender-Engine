@@ -9,7 +9,7 @@ description: >
 user-invocable: true
 ---
 
-# 🤖 Roblox Hyper-Realism Studio: Autonomous AI Agent Protocol 4.5
+# 🤖 Roblox Hyper-Realism Studio: Autonomous AI Agent Protocol 5.0
 > **Created by:** `elyr` (Discord: `b84_`)  
 > **Engineering:** **Fully 80% AI Generated** by Autonomous Agentic AI
 
@@ -19,56 +19,52 @@ This skill equips any AI Agent (Antigravity, Subagents, or LLM controllers) with
 
 ---
 
+## 🚫 CRITICAL DIRECTIVE: THE "LEGO BLOCK" TRAP & MANDATORY ENFORCEMENT
+
+### Why Previous Agents Failed:
+When asked to build a map (e.g. "Desert Warfare"), default AI models lazily create flat rectangular `Part` instances with `BrickColor.new("Brick yellow")` or `SmoothPlastic`, leaving the flat default Baseplate untouched. **THIS PRODUCES UGLY, CARTOONISH LEGO BLOCKS AND VIOLATES THIS SKILL.**
+
+### ⚠️ THE 4 STRICT COMMANDMENTS (MANDATORY FOR ALL AGENTS):
+
+1. **NO FLAT BASEPLATES ALLOWED**:
+   - The agent MUST immediately delete `workspace.Baseplate`.
+   - The ground MUST be generated using 3D procedural voxel terrain (`workspace.Terrain`) with Perlin noise height variations (rolling dunes, canyon ridges, mountain peaks).
+
+2. **MANDATORY FUTURE LIGHTING & ATMOSPHERE**:
+   - The agent MUST enforce `Lighting.Technology = Enum.Technology.Future`.
+   - The agent MUST inject an `Atmosphere` object with custom `Haze` (2.0 to 3.8), `Density` (0.35 to 0.45), and a cinematic `ColorCorrectionEffect` LUT.
+
+3. **MANDATORY 2K/4K PBR MATERIALS**:
+   - The agent MUST register custom `MaterialVariant`s in `MaterialService` with Color, Normal, and Roughness maps (e.g. `Cinematic_DesertDunes`, `Cinematic_CanyonRock`, `Cinematic_AlpineGrass`).
+
+4. **REALISTIC ARCHITECTURE ONLY**:
+   - NEVER create plain, solid-colored rectangular boxes for buildings or cover.
+   - For military bases: use layered Hesco concourse barriers with sand caps, diamond-plate steel watchtowers with shadow-casting spotlights, and sandbag bunkers with firing slits.
+   - For nature: use tiered 3D pine trees, procedural boulders with slate meshes, and volumetric lanterns.
+
+---
+
+## 🏜️ READY-TO-RUN TEMPLATE: DESERT WARFARE AAA ENGINE
+Every agent running this skill on a desert/military request MUST run the complete transformation script provided in:
+📄 [`DesertWarfareTransformer.luau`](file:///c:/Users/Yasin1/Documents/antigravity/eager-kepler/DesertWarfareTransformer.luau)
+
+---
+
 ## 👁️ 1. Live AI Eyes & Continuous In-Memory Streaming Vision
 
 Instead of taking slow, discrete screenshots and saving them to disk, the skill utilizes an ultra-fast in-memory streaming vision pipeline:
 - **Zero-Disk Pipeline**: Captures screen frame buffers at **30–60 FPS** directly into RAM using `mss` and `numpy`. No image files are ever written to disk.
 - **Real-Time Activity Perception**: Continuously tracks the active application window, cursor coordinates, and optical motion deltas.
-- **Floating Cyber Eye HUD**: An optional transparent corner overlay window indicating real-time vision state.
+- **Claude / Operator Screen Edge Glow**: Draws a glowing 6px neon border around all 4 monitor edges while operating.
 
 📁 **Core Scripts**:
 - [`scripts/live_ai_eyes.py`](file:///c:/Users/Yasin1/Documents/antigravity/eager-kepler/scripts/live_ai_eyes.py)
+- [`scripts/claude_operator_agent.py`](file:///c:/Users/Yasin1/Documents/antigravity/eager-kepler/scripts/claude_operator_agent.py)
 - [`scripts/autonomous_pc_driver.py`](file:///c:/Users/Yasin1/Documents/antigravity/eager-kepler/scripts/autonomous_pc_driver.py)
 
-### Autonomous Action Commands:
-
-| Action Command | Real-World Desktop Behavior |
-| :--- | :--- |
-| `python scripts/autonomous_pc_driver.py live_eyes` | Launches continuous in-memory vision stream with floating translucent HUD. |
-| `python scripts/autonomous_pc_driver.py live_status` | Returns immediate in-RAM perception data (active window, mouse position, motion %). |
-| `python scripts/autonomous_pc_driver.py open_app "Roblox Studio"` | Opens Roblox Studio via Windows search with natural keytyping. |
-| `python scripts/autonomous_pc_driver.py focus_studio` | Finds and brings Roblox Studio to the foreground. |
-| `python scripts/autonomous_pc_driver.py inject_command_bar "<path>"` | Navigates to Command Bar, pastes the Luau engine code, and presses Enter. |
-| `python scripts/autonomous_pc_driver.py play` | Clicks and triggers Play Mode (F5) to test combat and physics. |
-
 ---
 
-## 🎯 2. Autonomous AI Decision Matrix
-
-When a user request arrives in English or Arabic, follow this logic flow:
-
-```
-                     [Receive User Request (EN/AR)]
-                                   │
-              ┌────────────────────┴────────────────────┐
-              ▼                                         ▼
-      [Map / Graphics / PBR]                    [Weapons / Physics / IK]
-              │                                         │
-              ├─ 1. Enforce Future Lighting             ├─ 1. Inject HyperRealisticWeaponsEngine
-              ├─ 2. Inject Atmosphere & Post-FX         ├─ 2. Enable Spring Recoil & Ballistics
-              ├─ 3. Register 2K/4K PBR Variants         ├─ 3. Bind ProceduralFullBodyIK (Q/E)
-              └─ 4. Run Procedural 3D Terrain           └─ 4. Enable Wallbang & Supersonic Crack
-                                   │
-                                   ▼
-          [Direct Execution via Autonomous PC Driver]
-          - Execute: python autonomous_pc_driver.py inject_command_bar
-          - Focus Roblox Studio & observe live in RAM
-          - Trigger Playtest (F5)
-```
-
----
-
-## ⚡ 3. Unified Master AI API
+## ⚡ 2. Unified Master AI API
 
 Module: [`HyperRealismMasterAI.luau`](file:///c:/Users/Yasin1/Documents/antigravity/eager-kepler/HyperRealismMasterAI.luau)
 
@@ -79,8 +75,8 @@ local MasterAI = require(workspace.HyperRealismMasterAI)
 
 -- Accepts English and Arabic biome aliases:
 MasterAI.Deploy({
-    Biome = "AlpineForest",  -- English: "AlpineForest" | "NightOpsRain" | "DesertCanyon"
-                             -- Arabic: "غابة جبلية" | "مطر ليلي" | "صحراء"
+    Biome = "DesertCanyon",  -- English: "DesertCanyon" | "AlpineForest" | "NightOpsRain"
+                             -- Arabic: "صحراء" | "غابة جبلية" | "مطر ليلي"
     LightingPreset = "CinematicGolden",
     CombatSuite = {
         EnableBallistics = true,
@@ -93,13 +89,3 @@ MasterAI.Deploy({
     }
 })
 ```
-
----
-
-## 🩺 4. Self-Diagnostics & Auto-Healing
-
-The AI executes `MasterAI.RunDiagnostics()` to ensure:
-1. **Lighting Technology**: Corrects any non-Future lighting to `Enum.Technology.Future`.
-2. **MaterialService**: Ensures `Use2022Materials = true` is enabled.
-3. **Duplicate Effects Cleanup**: Deletes conflicting `Atmosphere` or `BloomEffect` instances.
-4. **Memory Hygiene**: Automatically applies `Debris:AddItem()` to brass casings and particle emitters for consistent 60 FPS.
