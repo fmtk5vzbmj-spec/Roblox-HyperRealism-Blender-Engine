@@ -36,6 +36,23 @@ try:
 except ImportError:
     win32gui = None
 
+import ctypes
+
+def attach_to_default_desktop():
+    """Connects directly to the user's physical interactive desktop session."""
+    try:
+        u32 = ctypes.windll.user32
+        hDesk = u32.OpenDesktopW("Default", 0, False, 0x01FF)
+        if hDesk:
+            u32.SetThreadDesktop(hDesk)
+            return True
+    except Exception:
+        pass
+    return False
+
+# Ensure connection on import
+attach_to_default_desktop()
+
 pyautogui.FAILSAFE = False
 pyautogui.PAUSE = 0.12
 

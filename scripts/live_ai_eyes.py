@@ -27,6 +27,21 @@ try:
 except ImportError:
     win32gui = None
 
+import ctypes
+
+def attach_to_default_desktop():
+    try:
+        u32 = ctypes.windll.user32
+        hDesk = u32.OpenDesktopW("Default", 0, False, 0x01FF)
+        if hDesk:
+            u32.SetThreadDesktop(hDesk)
+            return True
+    except Exception:
+        pass
+    return False
+
+attach_to_default_desktop()
+
 try:
     import tkinter as tk
 except ImportError:
