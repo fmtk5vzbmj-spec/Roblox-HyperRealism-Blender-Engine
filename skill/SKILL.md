@@ -14,24 +14,25 @@ user-invocable: true
 
 ---
 
-## 🖱️ 1. أداة التحكم بالماوس والكيبورد المدمجة في السكيل (AI Desktop Hands Driver)
+## 👁️ 1. محرك العيون الحية والبث اللحظي في الرام (Live AI Eyes & Streaming Vision)
 
-تم تزويد السكيل بمحرك تشغيل ذاتي مستقل يقع في:  
-📁 `C:\Users\Yasin1\.gemini\config\skills\roblox-hyper-realism\scripts\autonomous_pc_driver.py`
+بدلاً من أخذ لقطات شاشة بطيئة (Screenshots) وحفظها على الهاردسك، يعتمد السكيل الآن على **محرك رؤية حي ومستمر (Continuous In-Memory Stream)**:
+- التقاط إطارات الشاشة بسرعة تصل إلى **30-60 FPS** مباشرة في الذاكرة العشوائية (RAM) عبر `mss` و `numpy` بدون كتابة أي بايت على الديسك.
+- متابعة حركة المستخدم وموضع الماوس والنوافذ النشطة لحظة بلحظة (Optical Motion & Activity Tracking).
+- واجهة استشعار فورية `live_status` تسمح للذكاء الاصطناعي بمعرفة ما تفعله على الشاشة وكأنه "جالس بجانبك يتابعك حياً بعيون رقمية".
 
-يستطيع أي ذكاء اصطناعي استدعاء هذه الأوامر عبر أي Terminal أو Process ليتحكم بالحاسوب مباشرة وبشكل مرئي:
+📁 مسار المحرك: `scripts/live_ai_eyes.py` و `scripts/autonomous_pc_driver.py`
 
-### جدول الأوامر المتاحة للـ AI:
+### جدول الأوامر الحية المتاحة للـ AI:
 
-| الأمر الذي يشغله الـ AI | ماذا يحدث أمام عين المستخدم على الشاشة؟ |
+| الأمر الذي يشغله الـ AI | سلوك الرؤية الحية أمام المستخدم |
 | :--- | :--- |
-| `python ".../autonomous_pc_driver.py" open_app "Roblox Studio"` | يضغط زر Start، يكتب اسم التطبيق، ويفتحه بالماوس والكيبورد تلقائياً. |
-| `python ".../autonomous_pc_driver.py" focus_studio` | يجد نافذة Roblox Studio، ويعيد تكبيرها ويجلبها إلى مقدمة الشاشة. |
-| `python ".../autonomous_pc_driver.py" move_mouse 960 540` | يتحرك مؤشر الماوس بسلاسة ملحوظة أمام المستخدم إلى منتصف الشاشة. |
-| `python ".../autonomous_pc_driver.py" click 500 300` | يتحرك الماوس إلى الإحداثيات وينقر الزر الأيسر بشكل مرئي ومؤكد. |
-| `python ".../autonomous_pc_driver.py" inject_command_bar "<path_to_lua>"` | **السحر الحقيقي**: يركز على استوديو، يفتح شريط الأوامر، يلصق الكود، ويضغط Enter لتطبيق الجرافيكس والأسلحة فوراً! |
-| `python ".../autonomous_pc_driver.py" play` | يحرك الماوس ويضغط زر التجربة F5 لتشغيل الماب واختبار الشخصية والأسلحة. |
-| `python ".../autonomous_pc_driver.py" screenshot "view.png"` | يلتقط صورة للشاشة لتمكين الـ AI من رؤية النتيجة وتحليل المشهد بصرياً. |
+| `python ".../autonomous_pc_driver.py" live_eyes` | تفعيل البث الحي مع مؤشر عائم صغير (Floating Cyber HUD) في زاوية الشاشة يوضح أن الـ AI يتابعك حياً. |
+| `python ".../autonomous_pc_driver.py" live_status` | فحص فوري ومستمر في الرام لحالة النافذة وموقع الماوس وتفاعل الشاشة بدون سكرين شوت. |
+| `python ".../autonomous_pc_driver.py" open_app "Roblox Studio"` | يفتح التطبيق بالماوس والكيبورد تلقائياً أمامك. |
+| `python ".../autonomous_pc_driver.py" focus_studio` | يركز على استوديو ويجلبه للأمام فوراً. |
+| `python ".../autonomous_pc_driver.py" inject_command_bar "<path>"` | يلصق الكود في Command Bar ويضغط Enter أمامك لتطبيق الجرافيكس والأسلحة. |
+| `python ".../autonomous_pc_driver.py" play` | يحرك الماوس ويضغط زر F5 لاختبار الماب والفيزياء. |
 
 ---
 

@@ -1,10 +1,10 @@
 """
 ========================================================================================
-🖱️ AUTONOMOUS PC & ROBLOX STUDIO DRIVER (AI HANDS & EYES CONTROLLER)
+🖱️ AUTONOMOUS PC & ROBLOX STUDIO CONTROLLER (WITH LIVE CONTINUOUS AI EYES)
 ========================================================================================
-هذا المحرك يمنح أي ذكاء اصطناعي (AI Agent) القدرة على تحريك الماوس والكيبورد أمام المستخدم،
-وفتح التطبيقات، والتركيز على Roblox Studio، وإدخال الأكواد في الـ Command Bar،
-والتحكم في الواجهات ثلاثية الأبعاد والأزرار مباشرة بدون الاعتماد على أوامر الترمنل فقط.
+الوظيفة:
+  تحكم ذاتي كامل بالماوس والكيبورد وواجهات Roblox Studio مع نظام رؤية حي ومستمر
+  (Continuous In-Memory Streaming Vision) بدون حفظ لقطات شاشة على القرص الصلب.
 ========================================================================================
 """
 
@@ -14,23 +14,42 @@ import time
 import subprocess
 import pyautogui
 import pyperclip
-from PIL import Image
+
+# تهيئة دعم النصوص التعبيرية والعربية في ويندوز كونسول
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
+# استيراد محرك الرؤية الحية المستمرة
+try:
+    from live_ai_eyes import LiveAIEyes
+except ImportError:
+    try:
+        from scripts.live_ai_eyes import LiveAIEyes
+    except ImportError:
+        LiveAIEyes = None
 
 try:
     import win32gui
     import win32con
-    import win32process
 except ImportError:
     win32gui = None
 
-# إعدادات الأمان وسلاسة حركة الماوس لتبدو طبيعية ومرئية للمستخدم
 pyautogui.FAILSAFE = False
-pyautogui.PAUSE = 0.15
+pyautogui.PAUSE = 0.12
 
-def get_screen_resolution():
-    w, h = pyautogui.size()
-    print(f"🖥️ دقة الشاشة: {w}x{h}")
-    return w, h
+# كائن الرؤية الحية العام
+_live_eyes_instance = None
+
+def get_or_start_live_eyes(enable_hud=False):
+    global _live_eyes_instance
+    if _live_eyes_instance is None and LiveAIEyes:
+        _live_eyes_instance = LiveAIEyes(target_fps=30, enable_hud=enable_hud)
+        # تشغيل تيار الرؤية في الخلفية
+        import threading
+        t = threading.Thread(target=_live_eyes_instance._vision_loop, daemon=True)
+        t.start()
+        print("👁️ [Live Vision] محرك العيون الحية للذكاء الاصطناعي يعمل الآن ومتابع للشاشة بنسبة 100% في الرام!")
+    return _live_eyes_instance
 
 def find_window(title_pattern):
     if not win32gui:
@@ -45,26 +64,23 @@ def find_window(title_pattern):
     return matches[0] if matches else None
 
 def open_application(app_name):
-    """فتح أي تطبيق في الويندوز عبر الماوس والبحث التلقائي"""
+    """فتح التطبيق عبر الماوس والبحث الحي"""
     print(f"🚀 [AI Controller] جاري فتح التطبيق: {app_name}")
-    # الضغط على زر الويندوز
     pyautogui.press("win")
+    time.sleep(0.4)
+    pyautogui.write(app_name, interval=0.04)
     time.sleep(0.5)
-    # كتابة اسم التطبيق
-    pyautogui.write(app_name, interval=0.05)
-    time.sleep(0.6)
-    # الضغط على Enter للتشغيل
     pyautogui.press("enter")
     time.sleep(2.0)
-    print(f"✅ تم إطلاق {app_name}")
+    print(f"✅ تم فتح {app_name}")
 
 def focus_roblox_studio():
-    """التركيز على نافذة Roblox Studio وتقديمها للأمام"""
+    """التركيز الحي على Roblox Studio"""
     match = find_window("Roblox Studio")
     if not match:
         print("⚠️ Roblox Studio غير مفتوح، جاري تشغيله تلقائياً...")
         open_application("Roblox Studio")
-        time.sleep(4.0)
+        time.sleep(3.5)
         match = find_window("Roblox Studio")
 
     if match:
@@ -72,19 +88,18 @@ def focus_roblox_studio():
         try:
             win32gui.ShowWindow(hwnd, win32con.SW_RESTORE)
             win32gui.SetForegroundWindow(hwnd)
-            time.sleep(0.5)
-            print(f"🎯 تم التركيز على نافذة: {title}")
+            time.sleep(0.4)
+            print(f"🎯 تم التركيز الحي على: {title}")
             return hwnd
         except Exception as e:
-            print(f"تنبيه التركيز: {e}")
             win32gui.BringWindowToTop(hwnd)
             return hwnd
     print("❌ تعذر العثور على Roblox Studio.")
     return None
 
-def smooth_move_mouse(x, y, duration=0.6):
-    """تحريك الماوس بسلاسة ملحوظة أمام المستخدم"""
-    print(f"🖱️ [AI Vision] تحريك مؤشر الماوس إلى الإحداثيات: ({x}, {y})")
+def smooth_move_mouse(x, y, duration=0.5):
+    """تحريك الماوس بسلاسة أمام المستخدم"""
+    print(f"🖱️ [AI Hands] تحريك المؤشر إلى: ({x}, {y})")
     pyautogui.moveTo(int(x), int(y), duration=duration, tween=pyautogui.easeInOutQuad)
 
 def visible_click(x=None, y=None, button="left", clicks=1):
@@ -97,8 +112,8 @@ def visible_click(x=None, y=None, button="left", clicks=1):
 
 def inject_code_to_command_bar(code_or_file_path):
     """
-    التحكم في Roblox Studio:
-    التركيز، فتح الـ Command Bar، لصق الكود، والضغط على Enter أمام عين المستخدم!
+    التحكم المباشر في استوديو:
+    التركيز، الوصول إلى Command Bar، لصق الكود، والضغط على Enter أمام عين المستخدم!
     """
     code = code_or_file_path
     if os.path.exists(code_or_file_path):
@@ -110,59 +125,63 @@ def inject_code_to_command_bar(code_or_file_path):
         return False
 
     w, h = pyautogui.size()
-    time.sleep(0.4)
+    time.sleep(0.3)
 
-    # 1. نسخ الكود للحافظة
     pyperclip.copy(code)
-    print("📋 تم نسخ كود المحرك الواقعي للحافظة.")
+    print("📋 تم نسخ الكود إلى الحافظة.")
 
-    # 2. تحريك الماوس إلى أسفل الشاشة حيث يقع Command Bar عادة في Roblox Studio
+    # التوجه للـ Command Bar أسفل الشاشة
     command_bar_x = int(w * 0.35)
     command_bar_y = int(h - 35)
 
-    smooth_move_mouse(command_bar_x, command_bar_y, duration=0.6)
+    smooth_move_mouse(command_bar_x, command_bar_y, duration=0.5)
     time.sleep(0.2)
     pyautogui.click()
     time.sleep(0.2)
 
-    # 3. تحديد الكل ولصق الكود
     pyautogui.hotkey("ctrl", "a")
     time.sleep(0.1)
     pyautogui.hotkey("ctrl", "v")
     time.sleep(0.3)
 
-    # 4. الضغط على Enter لتشغيل الكود داخل استوديو
     pyautogui.press("enter")
-    print("🔥 [AI Action] تم تنفيذ الكود في Command Bar بنجاح داخل Roblox Studio!")
+    print("🔥 [AI Hands] تم تشغيل الكود في شريط الأوامر داخل Roblox Studio مباشرة أمامك!")
     return True
 
 def trigger_play_mode():
-    """تشغيل وضع اللعب والتجربة F5 أمام المستخدم"""
+    """تشغيل وضع اللعب والتجربة F5 بالماوس"""
     focus_roblox_studio()
-    time.sleep(0.4)
-    # تحريك الماوس إلى شريط الأدوات العلوي
+    time.sleep(0.3)
     w, h = pyautogui.size()
-    smooth_move_mouse(int(w * 0.5), int(h * 0.08), duration=0.5)
+    smooth_move_mouse(int(w * 0.5), int(h * 0.08), duration=0.4)
     time.sleep(0.2)
     pyautogui.press("f5")
-    print("🎮 [AI Action] تم بدء وضع اللعب والتجربة (Play Mode F5)!")
+    print("🎮 [AI Hands] تم بدء تجربة اللعب (Play Mode F5)!")
 
-def capture_screen(save_path):
-    """التقاط الشاشة لفحص حالة الاستوديو والماب بصرياً"""
-    screenshot = pyautogui.screenshot()
-    screenshot.save(save_path)
-    print(f"📸 [AI Vision] تم حفظ لقطة الشاشة في: {save_path}")
-    return save_path
+def get_live_status():
+    """قراءة ما يراه الذكاء الاصطناعي الآن حياً في الذاكرة بدون ديسك"""
+    eyes = get_or_start_live_eyes()
+    if eyes:
+        state = eyes.get_live_perception()
+        print(f"👁️ [Live Perception] النافذة النشطة: {state['active_app']} | الماوس: {state['mouse_pos']} | حركة الشاشة: {state['motion_percentage']}% | استوديو نشط: {state['roblox_active']}")
+        return state
+    return None
 
 def main():
     if len(sys.argv) < 2:
         print("Usage: autonomous_pc_driver.py <action> [args...]")
-        print("Actions: inject_command_bar, focus_studio, play, open_app, move_mouse, click, screenshot")
+        print("Actions: live_eyes, inject_command_bar, focus_studio, play, open_app, move_mouse, click, live_status")
         return
 
     action = sys.argv[1].lower()
 
-    if action == "inject_command_bar":
+    if action == "live_eyes":
+        # تشغيل نافذة الرؤية الحية المستمرة مع مؤشر HUD
+        eyes = LiveAIEyes(target_fps=30, enable_hud=True)
+        eyes.start_vision_stream()
+    elif action == "live_status":
+        get_live_status()
+    elif action == "inject_command_bar":
         target = sys.argv[2] if len(sys.argv) > 2 else "HyperRealismEngine.luau"
         inject_code_to_command_bar(target)
     elif action == "focus_studio":
@@ -178,9 +197,6 @@ def main():
         x = sys.argv[2] if len(sys.argv) > 2 else None
         y = sys.argv[3] if len(sys.argv) > 3 else None
         visible_click(x, y)
-    elif action == "screenshot":
-        path = sys.argv[2] if len(sys.argv) > 2 else "studio_view.png"
-        capture_screen(path)
     else:
         print(f"Unknown action: {action}")
 

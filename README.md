@@ -46,9 +46,11 @@
 - **Tactical Leaning (Q / E)**: Torso rotation and camera tilt for peeking corners.
 - **Procedural IK Foot Planting**: Two-bone IK adjusts foot height and angle on slopes and boulders.
 
-### 🤖 4. Autonomous AI Agent Integration & Desktop Controller
-- **Unified Master AI API** (`HyperRealismMasterAI.luau`): One-line deployment and self-healing diagnostics.
-- **Autonomous Desktop Driver** (`scripts/autonomous_pc_driver.py`): Gives AI agents physical hands and eyes to open apps, move the mouse smoothly, focus Roblox Studio, and paste code directly into the Command Bar.
+### 🤖 4. Autonomous AI Hands & Live Streaming Eyes (العيون الحية والبث اللحظي)
+- **Live AI Eyes (`scripts/live_ai_eyes.py`)**: Real-time 30-60 FPS in-memory screen perception using `mss` and `numpy` (Zero-disk, 100% RAM buffer, no screenshot files saved).
+- **Floating Cyber HUD**: Visual translucent indicator displaying real-time tracking (active window, mouse position, and screen motion).
+- **Autonomous Desktop Driver (`scripts/autonomous_pc_driver.py`)**: Allows AI agents to smoothly move the mouse, open applications, focus Roblox Studio, and paste scripts directly into the Command Bar before the user's eyes.
+- **Unified Master AI API (`HyperRealismMasterAI.luau`)**: One-line deployment and self-healing diagnostics for any autonomous agent.
 
 ---
 
