@@ -1,11 +1,12 @@
 --[[
     ========================================================================================
-    🤖 HYPER REALISM MASTER AI CONTROLLER (UNIFIED AUTONOMOUS AGENT API)
+    ROBLOX HYPER-REALISM MASTER AI CONTROLLER (UNIFIED AUTONOMOUS AGENT API)
     ========================================================================================
-    المطور: Antigravity Autonomous Engine
-    الوظيفة: واجهة برمجية موحدة مصممة للذكاء الاصطناعي (AI Agents) لتشخيص البيئة،
-             تفعيل الإضاءة السينمائية، خامات الـ PBR، أنظمة الأسلحة، وحركة الشخصيات
-             بأمر واحد فقط وبدون أخطاء.
+    Author: Antigravity Autonomous Engine
+    Description: Unified API designed for AI Agents to autonomously diagnose environments,
+                 apply Future Lighting, register 4K PBR materials, deploy ballistics, and 
+                 configure full-body IK with a single call.
+    Note: Full bilingual input support (accepts both English and Arabic parameter names).
     ========================================================================================
 ]]
 
@@ -15,10 +16,37 @@ local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
 
 local MasterAI = {}
-MasterAI.Version = "3.5-AI-Autonomous"
+MasterAI.Version = "4.0-English-BilingualAI"
 
 --------------------------------------------------------------------------------
--- 1. الفحص الذاتي والتصحيح التلقائي (SELF-DIAGNOSTICS & AUTO-HEALING)
+-- 1. BILINGUAL INTENT ALIAS MAPPING (ENGLISH & ARABIC SUPPORT)
+--------------------------------------------------------------------------------
+local BIOME_ALIASES = {
+    -- English aliases
+    ["alpineforest"] = "AlpineForest",
+    ["alpine"] = "AlpineForest",
+    ["forest"] = "AlpineForest",
+    ["nightopsrain"] = "NightOpsRain",
+    ["night"] = "NightOpsRain",
+    ["rain"] = "NightOpsRain",
+    ["tacticalnight"] = "NightOpsRain",
+    ["desertcanyon"] = "DesertCanyon",
+    ["desert"] = "DesertCanyon",
+    ["canyon"] = "DesertCanyon",
+    
+    -- Arabic aliases
+    ["غابة"] = "AlpineForest",
+    ["غابة جبلية"] = "AlpineForest",
+    ["مطر"] = "NightOpsRain",
+    ["ليل"] = "NightOpsRain",
+    ["مطر ليلي"] = "NightOpsRain",
+    ["تكتيكي"] = "NightOpsRain",
+    ["صحراء"] = "DesertCanyon",
+    ["كانيون"] = "DesertCanyon",
+}
+
+--------------------------------------------------------------------------------
+-- 2. AUTONOMOUS SELF-DIAGNOSTICS & HEALING
 --------------------------------------------------------------------------------
 function MasterAI.RunDiagnostics()
     local report = {
@@ -28,20 +56,20 @@ function MasterAI.RunDiagnostics()
         Status = "OPTIMAL"
     }
 
-    -- تصحيح الإضاءة إلى Future Lighting
+    -- Enforce Future Lighting technology
     if Lighting.Technology ~= Enum.Technology.Future then
         Lighting.Technology = Enum.Technology.Future
         Lighting.GlobalShadows = true
         report.LightingFixed = true
     end
 
-    -- تفعيل خامات الـ PBR الحديثة
+    -- Enforce 2022 PBR Materials pipeline
     if not MaterialService.Use2022Materials then
         MaterialService.Use2022Materials = true
         report.MaterialServiceFixed = true
     end
 
-    -- تنظيف المؤثرات المكررة التي تسبب تشوه ألوان الشاشة
+    -- Clean duplicate visual post-effects to prevent color clipping
     local postEffectCount = {}
     for _, child in ipairs(Lighting:GetChildren()) do
         if child:IsA("PostEffect") or child:IsA("Atmosphere") then
@@ -53,13 +81,13 @@ function MasterAI.RunDiagnostics()
         end
     end
 
-    print(string.format("🩺 [AI Diagnostics] تم الفحص: تصحيح إضاءة: %s | تنظيف مؤثرات: %d", 
+    print(string.format("[MasterAI Diagnostics] Self-test complete: LightingFixed=%s | DuplicatesCleaned=%d", 
         tostring(report.LightingFixed), report.DuplicateEffectsCleaned))
     return report
 end
 
 --------------------------------------------------------------------------------
--- 2. مصفوفة الإعدادات الجاهزة (BIOME & LIGHTING PRESETS)
+-- 3. ENVIRONMENT & LIGHTING PRESETS
 --------------------------------------------------------------------------------
 MasterAI.Presets = {
     AlpineForest = {
@@ -92,26 +120,29 @@ MasterAI.Presets = {
 }
 
 --------------------------------------------------------------------------------
--- 3. دالة النشر والتشغيل التلقائية الموحدة (ONE-CALL AUTONOMOUS DEPLOY)
+-- 4. ONE-CALL AUTONOMOUS DEPLOYMENT (BILINGUAL SUPPORT)
 --------------------------------------------------------------------------------
 function MasterAI.Deploy(config)
     config = config or {}
-    local biomeName = config.Biome or "AlpineForest"
-    local preset = MasterAI.Presets[biomeName] or MasterAI.Presets.AlpineForest
+    
+    -- Normalize biome parameter from English or Arabic
+    local inputBiome = tostring(config.Biome or config.biome or "AlpineForest"):lower()
+    local resolvedBiome = BIOME_ALIASES[inputBiome] or "AlpineForest"
+    local preset = MasterAI.Presets[resolvedBiome] or MasterAI.Presets.AlpineForest
 
-    print("🚀 [MasterAI] جاري تشغيل بيئة: " .. biomeName)
+    print("[MasterAI] Autonomous deployment initiated for biome: " .. resolvedBiome)
 
-    -- تشغيل الفحص الذاتي أولاً
+    -- Step 1: Execute diagnostics & healing
     MasterAI.RunDiagnostics()
 
-    -- تطبيق الإضاءة والغلاف الجوي
+    -- Step 2: Apply Future Lighting & Sun Angle
     Lighting.TimeOfDay = preset.TimeOfDay
     Lighting.Brightness = preset.Brightness
     Lighting.OutdoorAmbient = Color3.fromRGB(85, 90, 100)
     Lighting.EnvironmentDiffuseScale = 1
     Lighting.EnvironmentSpecularScale = 1
 
-    -- إعداد Atmosphere
+    -- Step 3: Configure Volumetric Atmosphere
     local atmosphere = Lighting:FindFirstChildOfClass("Atmosphere") or Instance.new("Atmosphere")
     atmosphere.Density = preset.AtmosphereDensity
     atmosphere.Haze = preset.AtmosphereHaze
@@ -120,17 +151,17 @@ function MasterAI.Deploy(config)
     atmosphere.Glare = 0.35
     atmosphere.Parent = Lighting
 
-    -- إعداد ColorCorrection
+    -- Step 4: Configure Cinematic LUT ColorCorrection
     local cc = Lighting:FindFirstChildOfClass("ColorCorrectionEffect") or Instance.new("ColorCorrectionEffect")
     cc.Brightness = 0.02
-    cc.Contrast = (biomeName == "NightOpsRain") and 0.22 or 0.16
-    cc.Saturation = (biomeName == "NightOpsRain") and -0.05 or 0.12
+    cc.Contrast = (resolvedBiome == "NightOpsRain") and 0.22 or 0.16
+    cc.Saturation = (resolvedBiome == "NightOpsRain") and -0.05 or 0.12
     cc.Parent = Lighting
 
-    -- ضبط الرياح العالمية
+    -- Step 5: Global Wind Dynamics
     workspace.GlobalWind = preset.Wind
 
-    -- تهيئة التضاريس والمياه
+    -- Step 6: Water & Terrain Configuration
     local terrain = workspace:FindFirstChildOfClass("Terrain")
     if terrain then
         terrain.Decoration = true
@@ -138,7 +169,7 @@ function MasterAI.Deploy(config)
         terrain.WaterReflectance = 0.92
     end
 
-    print("✨ [MasterAI] تم بنجاح تطبيق كامل منظومة الواقعية الفائقة بشكل ذاتي!")
+    print("[MasterAI] Deployment successfully completed! Hyper-realism active.")
     return true
 end
 

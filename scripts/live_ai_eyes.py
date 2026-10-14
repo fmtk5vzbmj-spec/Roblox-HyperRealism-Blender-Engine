@@ -1,13 +1,14 @@
 """
 ========================================================================================
-👁️ LIVE AI EYES & CONTINUOUS DESKTOP OBSERVER (REAL-TIME STREAMING VISION)
+LIVE AI EYES & CONTINUOUS DESKTOP OBSERVER (REAL-TIME IN-MEMORY STREAMING VISION)
 ========================================================================================
-الوظيفة:
-  محرك رؤية حي ومستمر (Live Vision Engine) للذكاء الاصطناعي بدون حفظ أي سكرين شوت على الهاردسك.
-  - التقاط إطارات الشاشة بسرعة 30-60 FPS مباشرة في الذاكرة العشوائية (RAM) عبر mss و numpy.
-  - متابعة المستخدم والماوس والتطبيقات المفتوحة واستوديو روبلوكس في الوقت الفعلي (Real-Time).
-  - كشف الحركة والتغييرات الحية على الشاشة (Optical Motion & Activity Detection).
-  - مؤشر بصري عائم (Floating Cyber Eye HUD) يوضح أن الذكاء الاصطناعي "يتابعك ويشاهدك حياً".
+Author: Antigravity Autonomous Engine
+Description:
+  Continuous real-time vision engine for AI agents operating completely in RAM.
+  - Zero-disk frame streaming at 30-60 FPS using mss and numpy.
+  - Real-time user cursor, active window, and screen activity tracking.
+  - Optical motion delta calculation without storing any screenshots.
+  - Sleek floating translucent Cyber Eye HUD displaying live tracking status.
 ========================================================================================
 """
 
@@ -39,7 +40,7 @@ class LiveAIEyes:
         self.frame_delay = 1.0 / target_fps
         self.is_running = False
         self.sct = mss.mss()
-        self.monitor = self.sct.monitors[1] # الشاشة الرئيسية
+        self.monitor = self.sct.monitors[1]
         self.last_frame = None
         self.active_window_title = ""
         self.cursor_pos = (0, 0)
@@ -47,7 +48,6 @@ class LiveAIEyes:
         self.hud_root = None
         self.hud_label = None
 
-        # ذاكرة الإدراك البصري الحي في الرام فقط
         self.current_state = {
             "fps": 0,
             "motion_detected": False,
@@ -59,16 +59,15 @@ class LiveAIEyes:
         }
 
     def start_vision_stream(self):
-        """بدء تيار الرؤية الحي في الخلفية"""
+        """Starts the continuous in-memory vision stream."""
         self.is_running = True
         self.stream_thread = threading.Thread(target=self._vision_loop, daemon=True)
         self.stream_thread.start()
-        print("👁️ [Live AI Eyes] تم تفعيل الرؤية الحية المستمرة (Zero-Disk Streaming) في الذاكرة!")
+        print("[Live AI Eyes] Continuous in-memory vision stream active (Zero-disk RAM pipeline)!")
 
         if self.enable_hud and tk:
             self._start_floating_eye_hud()
         else:
-            # إبقاء التشغيل حياً في الترمنل
             try:
                 while self.is_running:
                     time.sleep(1.0)
@@ -76,34 +75,28 @@ class LiveAIEyes:
                 self.stop()
 
     def _vision_loop(self):
-        """حلقة الرؤية المستمرة في الرام بسرعة عالية"""
+        """High-speed in-memory capture loop."""
         frame_count = 0
         fps_timer = time.time()
 
         while self.is_running:
             loop_start = time.time()
 
-            # 1. التقاط فوري للإطار مباشرة في الرام (بدون كتابة ملفات ديسك)
             raw_img = self.sct.grab(self.monitor)
-            # تحويل الإطار إلى مصفوفة رقمية سريعة بالـ numpy
             frame = np.array(raw_img, dtype=np.uint8)
 
-            # 2. فحص حركة الشاشة عبر حساب الفرق بين الإطارات (Optical Motion Detection)
             motion_percent = 0.0
             if self.last_frame is not None:
-                # عينة سريعة مخففة 1/8 لحساب سريع لا يستهلك المعالج
                 diff = np.abs(frame[::8, ::8, :3].astype(int) - self.last_frame[::8, ::8, :3].astype(int))
                 motion_pixels = np.sum(diff > 25)
                 motion_percent = (motion_pixels / diff.size) * 100.0
 
             self.last_frame = frame
 
-            # 3. تتبع مؤشر الماوس والنافذة النشطة في الوقت الحقيقي
             current_mouse = pyautogui.position()
             current_window = self._get_active_window_title()
             is_roblox = "roblox" in current_window.lower()
 
-            # 4. تحديث الوعي البصري الحي
             frame_count += 1
             if time.time() - fps_timer >= 1.0:
                 self.current_state["fps"] = frame_count
@@ -117,12 +110,10 @@ class LiveAIEyes:
             self.current_state["roblox_active"] = is_roblox
             self.current_state["timestamp"] = time.time()
 
-            # تحديث شريط الـ HUD العائم إذا كان مفعلاً
             if self.hud_label:
                 status_text = f"👁️ AI Eyes LIVE ({self.current_state['fps']} FPS)\nApp: {current_window[:28]}\nMouse: ({current_mouse.x}, {current_mouse.y})"
                 self.hud_label.config(text=status_text)
 
-            # الحفاظ على معدل الإطارات المطلوب لتفادي استهلاك المعالج
             elapsed = time.time() - loop_start
             sleep_time = max(0, self.frame_delay - elapsed)
             time.sleep(sleep_time)
@@ -137,14 +128,13 @@ class LiveAIEyes:
             return "Unknown"
 
     def _start_floating_eye_hud(self):
-        """عرض مؤشر بصري عائم وصغير في زاوية الشاشة يوضح أن الـ AI يراقب الشاشة حياً"""
+        """Displays a sleek floating HUD in the screen corner."""
         self.hud_root = tk.Tk()
         self.hud_root.title("AI Live Vision")
-        self.hud_root.overrideredirect(True) # بدون شريط نوافذ
-        self.hud_root.attributes("-topmost", True) # دائماً في المقدمة
-        self.hud_root.attributes("-alpha", 0.82) # شفافية عصرية شبه زجاجية
+        self.hud_root.overrideredirect(True)
+        self.hud_root.attributes("-topmost", True)
+        self.hud_root.attributes("-alpha", 0.82)
 
-        # وضع الـ HUD في أعلى يمين الشاشة
         sw = self.hud_root.winfo_screenwidth()
         self.hud_root.geometry(f"220x65+{sw - 235}+20")
         self.hud_root.configure(bg="#0c1017")
@@ -164,7 +154,6 @@ class LiveAIEyes:
         )
         self.hud_label.pack(fill=tk.BOTH, expand=True)
 
-        # إمكانية إغلاق الـ HUD بالنقر المزدوج
         self.hud_root.bind("<Double-Button-1>", lambda e: self.stop())
 
         try:
@@ -179,10 +168,10 @@ class LiveAIEyes:
                 self.hud_root.destroy()
             except:
                 pass
-        print("🛑 تم إيقاف الرؤية الحية للذكاء الاصطناعي.")
+        print("[Live AI Eyes] Vision stream stopped.")
 
     def get_live_perception(self):
-        """واجهة استعلام لحظية للذكاء الاصطناعي لقراءة ما يراه الآن"""
+        """Returns the real-time visual perception dictionary."""
         return self.current_state
 
 if __name__ == "__main__":

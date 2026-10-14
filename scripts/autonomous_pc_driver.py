@@ -1,10 +1,12 @@
 """
 ========================================================================================
-🖱️ AUTONOMOUS PC & ROBLOX STUDIO CONTROLLER (WITH LIVE CONTINUOUS AI EYES)
+AUTONOMOUS PC & ROBLOX STUDIO CONTROLLER (WITH LIVE IN-MEMORY AI VISION)
 ========================================================================================
-الوظيفة:
-  تحكم ذاتي كامل بالماوس والكيبورد وواجهات Roblox Studio مع نظام رؤية حي ومستمر
-  (Continuous In-Memory Streaming Vision) بدون حفظ لقطات شاشة على القرص الصلب.
+Author: Antigravity Autonomous Engine
+Description:
+  Full autonomous mouse, keyboard, and Roblox Studio controller equipped with continuous
+  zero-disk streaming vision (RAM-only pipeline without saving screenshots).
+  Supports bilingual application targeting (English and Arabic names).
 ========================================================================================
 """
 
@@ -15,11 +17,9 @@ import subprocess
 import pyautogui
 import pyperclip
 
-# تهيئة دعم النصوص التعبيرية والعربية في ويندوز كونسول
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-# استيراد محرك الرؤية الحية المستمرة
 try:
     from live_ai_eyes import LiveAIEyes
 except ImportError:
@@ -37,18 +37,16 @@ except ImportError:
 pyautogui.FAILSAFE = False
 pyautogui.PAUSE = 0.12
 
-# كائن الرؤية الحية العام
 _live_eyes_instance = None
 
 def get_or_start_live_eyes(enable_hud=False):
     global _live_eyes_instance
     if _live_eyes_instance is None and LiveAIEyes:
         _live_eyes_instance = LiveAIEyes(target_fps=30, enable_hud=enable_hud)
-        # تشغيل تيار الرؤية في الخلفية
         import threading
         t = threading.Thread(target=_live_eyes_instance._vision_loop, daemon=True)
         t.start()
-        print("👁️ [Live Vision] محرك العيون الحية للذكاء الاصطناعي يعمل الآن ومتابع للشاشة بنسبة 100% في الرام!")
+        print("[Live Vision] Continuous AI vision stream active in RAM (100% Zero-disk)!")
     return _live_eyes_instance
 
 def find_window(title_pattern):
@@ -64,21 +62,21 @@ def find_window(title_pattern):
     return matches[0] if matches else None
 
 def open_application(app_name):
-    """فتح التطبيق عبر الماوس والبحث الحي"""
-    print(f"🚀 [AI Controller] جاري فتح التطبيق: {app_name}")
+    """Opens any Windows application with natural typing."""
+    print(f"[AI Controller] Launching application: {app_name}")
     pyautogui.press("win")
     time.sleep(0.4)
     pyautogui.write(app_name, interval=0.04)
     time.sleep(0.5)
     pyautogui.press("enter")
     time.sleep(2.0)
-    print(f"✅ تم فتح {app_name}")
+    print(f"[AI Controller] Launched {app_name} successfully.")
 
 def focus_roblox_studio():
-    """التركيز الحي على Roblox Studio"""
+    """Focuses and brings Roblox Studio to the foreground."""
     match = find_window("Roblox Studio")
     if not match:
-        print("⚠️ Roblox Studio غير مفتوح، جاري تشغيله تلقائياً...")
+        print("[AI Controller] Roblox Studio not running, launching automatically...")
         open_application("Roblox Studio")
         time.sleep(3.5)
         match = find_window("Roblox Studio")
@@ -89,31 +87,30 @@ def focus_roblox_studio():
             win32gui.ShowWindow(hwnd, win32con.SW_RESTORE)
             win32gui.SetForegroundWindow(hwnd)
             time.sleep(0.4)
-            print(f"🎯 تم التركيز الحي على: {title}")
+            print(f"[AI Controller] Focused window: {title}")
             return hwnd
-        except Exception as e:
+        except Exception:
             win32gui.BringWindowToTop(hwnd)
             return hwnd
-    print("❌ تعذر العثور على Roblox Studio.")
+    print("[AI Controller] Could not locate Roblox Studio window.")
     return None
 
 def smooth_move_mouse(x, y, duration=0.5):
-    """تحريك الماوس بسلاسة أمام المستخدم"""
-    print(f"🖱️ [AI Hands] تحريك المؤشر إلى: ({x}, {y})")
+    """Smoothly moves the cursor across the screen."""
+    print(f"[AI Hands] Moving cursor to: ({x}, {y})")
     pyautogui.moveTo(int(x), int(y), duration=duration, tween=pyautogui.easeInOutQuad)
 
 def visible_click(x=None, y=None, button="left", clicks=1):
-    """النقر بالماوس بشكل مرئي ومؤكد"""
+    """Performs a visible mouse click."""
     if x is not None and y is not None:
         smooth_move_mouse(x, y, duration=0.4)
     time.sleep(0.1)
     pyautogui.click(button=button, clicks=clicks)
-    print(f"👆 [AI Click] نقرة {button} في الموقع الحالي.")
+    print(f"[AI Click] {button.capitalize()} clicked at current coordinate.")
 
 def inject_code_to_command_bar(code_or_file_path):
     """
-    التحكم المباشر في استوديو:
-    التركيز، الوصول إلى Command Bar، لصق الكود، والضغط على Enter أمام عين المستخدم!
+    Directly injects and executes Luau scripts inside Roblox Studio Command Bar.
     """
     code = code_or_file_path
     if os.path.exists(code_or_file_path):
@@ -128,9 +125,9 @@ def inject_code_to_command_bar(code_or_file_path):
     time.sleep(0.3)
 
     pyperclip.copy(code)
-    print("📋 تم نسخ الكود إلى الحافظة.")
+    print("[AI Controller] Script copied to clipboard.")
 
-    # التوجه للـ Command Bar أسفل الشاشة
+    # Target Roblox Studio Command Bar at bottom
     command_bar_x = int(w * 0.35)
     command_bar_y = int(h - 35)
 
@@ -145,25 +142,25 @@ def inject_code_to_command_bar(code_or_file_path):
     time.sleep(0.3)
 
     pyautogui.press("enter")
-    print("🔥 [AI Hands] تم تشغيل الكود في شريط الأوامر داخل Roblox Studio مباشرة أمامك!")
+    print("[AI Hands] Code executed in Roblox Studio Command Bar successfully!")
     return True
 
 def trigger_play_mode():
-    """تشغيل وضع اللعب والتجربة F5 بالماوس"""
+    """Triggers Play Mode (F5) in Roblox Studio."""
     focus_roblox_studio()
     time.sleep(0.3)
     w, h = pyautogui.size()
     smooth_move_mouse(int(w * 0.5), int(h * 0.08), duration=0.4)
     time.sleep(0.2)
     pyautogui.press("f5")
-    print("🎮 [AI Hands] تم بدء تجربة اللعب (Play Mode F5)!")
+    print("[AI Hands] Play Mode (F5) triggered successfully!")
 
 def get_live_status():
-    """قراءة ما يراه الذكاء الاصطناعي الآن حياً في الذاكرة بدون ديسك"""
+    """Queries real-time perception state in RAM."""
     eyes = get_or_start_live_eyes()
     if eyes:
         state = eyes.get_live_perception()
-        print(f"👁️ [Live Perception] النافذة النشطة: {state['active_app']} | الماوس: {state['mouse_pos']} | حركة الشاشة: {state['motion_percentage']}% | استوديو نشط: {state['roblox_active']}")
+        print(f"[Live Perception] ActiveWindow: {state['active_app']} | Mouse: {state['mouse_pos']} | Motion: {state['motion_percentage']}% | StudioActive: {state['roblox_active']}")
         return state
     return None
 
@@ -176,7 +173,6 @@ def main():
     action = sys.argv[1].lower()
 
     if action == "live_eyes":
-        # تشغيل نافذة الرؤية الحية المستمرة مع مؤشر HUD
         eyes = LiveAIEyes(target_fps=30, enable_hud=True)
         eyes.start_vision_stream()
     elif action == "live_status":

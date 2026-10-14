@@ -1,11 +1,12 @@
 --[[
     ========================================================================================
-    🔥 ADVANCED TACTICAL SUITE (WALLBANG PENETRATION, BRASS EJECTION & SUPERSONIC CRACK)
+    ADVANCED TACTICAL SUITE (WALLBANG PENETRATION, BRASS EJECTION & SUPERSONIC CRACK)
     ========================================================================================
-    الميزات:
-      1. اختراق الجدران والأسطح (Wallbang Penetration) بحسب كثافة المادة (خشب، معدن، زجاج)
-      2. قذف فوارغ الرصاص فيزيائياً (Physical Brass Casings) مع ارتداد وصوت رنين على الأرض
-      3. صوت اختراق حاجز الصوت (Supersonic Bullet Snap) عند مرور الرصاصة قرب رأس اللاعب
+    Author: Antigravity Roblox Architect
+    Features:
+      1. Material-Aware Wallbang Penetration (Glass, Wood, Thin Metal, Concrete)
+      2. Physical Spent Brass Casings with Realistic Ejection & Ground Bouncing
+      3. Supersonic Bullet Snap / Doppler Crack near Player Heads
     ========================================================================================
 ]]
 
@@ -14,7 +15,7 @@ local Players = game:GetService("Players")
 
 local TacticalSuite = {}
 
--- جدول كثافة المواد وسماكة الاختراق المسموحة (Studs)
+-- Material density and maximum penetration thickness limits (Studs)
 local PENETRATION_LIMITS = {
     [Enum.Material.Glass] = 12.0,
     [Enum.Material.Wood] = 2.8,
@@ -29,13 +30,13 @@ local PENETRATION_LIMITS = {
 }
 
 --------------------------------------------------------------------------------
--- 1. فحص اختراق الجدران (WALLBANG SYSTEM)
+-- 1. MATERIAL-AWARE WALL PENETRATION (WALLBANG)
 --------------------------------------------------------------------------------
 function TacticalSuite.CheckPenetration(entryPos, bulletDir, hitMaterial, hitInstance)
     local maxDistance = PENETRATION_LIMITS[hitMaterial] or 0.2
-    if maxDistance <= 0.1 then return nil, 0 end -- مادة غير قابلة للاختراق
+    if maxDistance <= 0.1 then return nil, 0 end
 
-    -- إطلاق شعاع عكسي من الجهة الأخرى للجدار للعثور على نقطة الخروج
+    -- Raycast backwards from expected exit point
     local rayOrigin = entryPos + (bulletDir * maxDistance)
     local rayDir = -bulletDir * (maxDistance + 0.1)
 
@@ -47,7 +48,6 @@ function TacticalSuite.CheckPenetration(entryPos, bulletDir, hitMaterial, hitIns
     if exitResult then
         local wallThickness = (exitResult.Position - entryPos).Magnitude
         if wallThickness <= maxDistance then
-            -- تم الاختراق بنجاح! حساب نسبة فقدان الضرر بناءً على السماكة
             local damageFactor = 1 - (wallThickness / maxDistance) * 0.65
             return exitResult.Position, damageFactor
         end
@@ -56,7 +56,7 @@ function TacticalSuite.CheckPenetration(entryPos, bulletDir, hitMaterial, hitIns
 end
 
 --------------------------------------------------------------------------------
--- 2. قذف فوارغ الرصاص الفيزيائية (PHYSICAL BRASS CASING EJECTION)
+-- 2. PHYSICAL SPENT BRASS CASINGS
 --------------------------------------------------------------------------------
 function TacticalSuite.EjectCasing(ejectionPortCFrame)
     local casing = Instance.new("Part")
@@ -64,12 +64,11 @@ function TacticalSuite.EjectCasing(ejectionPortCFrame)
     casing.Size = Vector3.new(0.12, 0.35, 0.12)
     casing.CFrame = ejectionPortCFrame
     casing.Material = Enum.Material.Metal
-    casing.Color = Color3.fromRGB(212, 175, 55) -- لون نحاسي لامع
+    casing.Color = Color3.fromRGB(212, 175, 55) -- Polished brass
     casing.CanCollide = true
     casing.Massless = false
     casing.Parent = workspace
 
-    -- تطبيق سرعة وقوة اندفاع عشوائية جانبية واقعية
     local rightForce = ejectionPortCFrame.RightVector * math.random(14, 22)
     local upForce = ejectionPortCFrame.UpVector * math.random(6, 12)
     local forwardForce = -ejectionPortCFrame.LookVector * math.random(2, 5)
@@ -81,12 +80,11 @@ function TacticalSuite.EjectCasing(ejectionPortCFrame)
         math.random(-40, 40)
     )
 
-    -- إزالة الفارغ بعد 4 ثوانٍ للحفاظ على ثبات الأداء
     Debris:AddItem(casing, 4.0)
 end
 
 --------------------------------------------------------------------------------
--- 3. صوت أزيز واختراق الرصاص لرأس اللاعب (SUPERSONIC WHIZ / CRACK)
+-- 3. SUPERSONIC BULLET SNAP / WHIZ
 --------------------------------------------------------------------------------
 function TacticalSuite.CheckPlayerProximity(bulletPos, bulletVelocity)
     local localPlayer = Players.LocalPlayer
@@ -96,9 +94,9 @@ function TacticalSuite.CheckPlayerProximity(bulletPos, bulletVelocity)
     if not head then return end
 
     local distance = (head.Position - bulletPos).Magnitude
-    if distance < 14 and distance > 1.5 then -- مرت الرصاصة قريباً جداً من الرأس
+    if distance < 14 and distance > 1.5 then
         local snapSound = Instance.new("Sound")
-        snapSound.SoundId = "rbxassetid://9114223173" -- صوت طلقة حاد يمر فوق الرأس
+        snapSound.SoundId = "rbxassetid://9114223173"
         snapSound.Volume = 0.8
         snapSound.PlayOnRemove = true
         snapSound.Parent = head

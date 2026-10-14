@@ -1,12 +1,13 @@
 --[[
     ========================================================================================
-    👤 PROCEDURAL FULL-BODY IK & TRUE FIRST-PERSON SYSTEM (AAA ROBLOX IMMERSION)
+    PROCEDURAL FULL-BODY IK & TRUE FIRST-PERSON SYSTEM (AAA ROBLOX IMMERSION)
     ========================================================================================
-    الميزات:
-      1. True First-Person: اللاعب يرى جسده بالكامل وسترته وقدميه وظله الطبيعي
-      2. تثبيت الأقدام الرياضي (Two-Bone IK Foot Planting) على الصخور والمنحدرات والدرج
-      3. الميلان التكتيكي (Q / E Tactical Leaning) مع انحناء الجذع وتدوير السلاح
-      4. تخميد وتمايل الكاميرا الإجرائي (Procedural Camera Bobbing & Breathing)
+    Author: Antigravity Roblox Architect
+    Features:
+      1. True First-Person: Player sees their complete body, chest rig, legs, and shadow
+      2. Procedural IK Foot Planting on uneven terrain, slopes, and stairs
+      3. Tactical Leaning (Q / E) with torso rotation and camera tilting
+      4. Dynamic Procedural Head Bobbing & Breathing Curves
     ========================================================================================
 ]]
 
@@ -22,19 +23,19 @@ local Humanoid = Character:WaitForChild("Humanoid")
 local RootPart = Character:WaitForChild("HumanoidRootPart")
 local Torso = Character:FindFirstChild("UpperTorso") or Character:FindFirstChild("Torso")
 
--- متغيرات الميلان التكتيكي (Lean)
+-- Tactical leaning variables
 local leanTarget = 0
 local currentLean = 0
 local LEAN_ANGLE = math.rad(18)
 local LEAN_SPEED = 12
 
--- مدخلات لوحة المفاتيح للميلان Q / E
+-- Keyboard inputs for Q / E leaning
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if input.KeyCode == Enum.KeyCode.Q then
-        leanTarget = 1 -- ميلان يسار
+        leanTarget = 1 -- Lean Left
     elseif input.KeyCode == Enum.KeyCode.E then
-        leanTarget = -1 -- ميلان يمين
+        leanTarget = -1 -- Lean Right
     end
 end)
 
@@ -47,7 +48,7 @@ UserInputService.InputEnded:Connect(function(input)
 end)
 
 --------------------------------------------------------------------------------
--- 1. نظام تثبيت القدمين على الأراضي الوعرة (IK FOOT PLANTING)
+-- 1. TWO-BONE IK FOOT PLANTING SOLVER
 --------------------------------------------------------------------------------
 local function solveFootPlanting(legName, hipAttachment)
     local rayOrigin = hipAttachment.WorldPosition
@@ -63,7 +64,6 @@ local function solveFootPlanting(legName, hipAttachment)
         local hitPoint = result.Position
         local hitNormal = result.Normal
 
-        -- حساب التعديل الرأسي للقدم لملامسة السطح بدقة
         local footOffset = (hitPoint - (rayOrigin + rayDir)).Y
         return footOffset, hitNormal
     end
@@ -71,29 +71,29 @@ local function solveFootPlanting(legName, hipAttachment)
 end
 
 --------------------------------------------------------------------------------
--- 2. حلقة التحديث المستمر في كل إطار (HEARTBEAT LOOP)
+-- 2. RENDERSTEPPED HEARTBEAT LOOP
 --------------------------------------------------------------------------------
 local timeStep = 0
 RunService.RenderStepped:Connect(function(dt)
     if not Character or not Humanoid or Humanoid.Health <= 0 then return end
 
-    -- أ) معالجة الميلان التكتيكي بسلاسة زنبركية
+    -- A) Smooth spring-based tactical lean interpolation
     currentLean = currentLean + (leanTarget - currentLean) * math.min(dt * LEAN_SPEED, 1)
 
-    -- ب) محاكاة تنفس وتمايل الكاميرا (Head Bobbing)
+    -- B) Procedural breathing & head bobbing simulation
     local moveSpeed = RootPart.AssemblyLinearVelocity.Magnitude
     local isMoving = moveSpeed > 1.5
 
     if isMoving then
         timeStep = timeStep + dt * (moveSpeed * 1.8)
     else
-        timeStep = timeStep + dt * 1.5 -- وتيرة تنفس هادئة
+        timeStep = timeStep + dt * 1.5
     end
 
     local bobY = math.sin(timeStep) * (isMoving and 0.08 or 0.015)
     local bobX = math.cos(timeStep * 0.5) * (isMoving and 0.06 or 0.008)
 
-    -- ج) تطبيق إمالة الكاميرا التكتيكية
+    -- C) Apply lean offset and rotation to camera
     local leanOffset = Vector3.new(currentLean * 1.4, -math.abs(currentLean) * 0.2, 0)
     local leanRotation = CFrame.Angles(0, 0, currentLean * LEAN_ANGLE)
 
@@ -101,12 +101,12 @@ RunService.RenderStepped:Connect(function(dt)
         * CFrame.new(bobX + leanOffset.X, bobY + leanOffset.Y, 0) 
         * leanRotation
 
-    -- د) جعل أطراف وجسد اللاعب مرئية دائماً لمنظور الشخص الأول (True First-Person)
+    -- D) Ensure True First-Person: Body and limbs remain visible
     for _, part in ipairs(Character:GetChildren()) do
         if part:IsA("BasePart") and part.Name ~= "Head" then
-            part.LocalTransparencyModifier = 0 -- إظهار الجسم والذراعين والساقين
+            part.LocalTransparencyModifier = 0
         end
     end
 end)
 
-print("✅ [FullBodyIK] تم تفعيل نظام الجسد الكامل والميلان التكتيكي وتثبيت الأقدام بنجاح.")
+print("[FullBodyIK] True First-Person, tactical leaning, and IK foot planting active.")

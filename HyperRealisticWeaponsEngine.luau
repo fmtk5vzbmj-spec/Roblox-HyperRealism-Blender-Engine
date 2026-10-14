@@ -1,14 +1,14 @@
 --[[
     ========================================================================================
-    🔫 HYPER-REALISTIC WEAPONS & BALLISTICS ENGINE (ROBLOX AAA SIMULATION)
+    HYPER-REALISTIC WEAPONS & BALLISTICS ENGINE (ROBLOX AAA SIMULATION)
     ========================================================================================
-    المطور: Antigravity Roblox Architect
-    الميزات:
-      1. فيزياء مقذوفات حقيقية: سرعة ابتدائية + سقوط الرصاصة (Bullet Drop) + مقاومة الرياح
-      2. نظام ارتداد زنبركي حقيقي (Procedural Spring Recoil Physics)
-      3. وميض إطلاق ديناميكي يضيء البيئة مع ظلال Future Lighting حقيقية
-      4. تفاعل فيزيائي ذكي مع الأسطح (شرار للمعدن، شظايا للخشب، غبار للطين، دماء للأجسام)
-      5. حركة تمايل السلاح وتأخره الطبيعي (Weapon Sway & Inertia)
+    Author: Antigravity Roblox Architect
+    Features:
+      1. Real Ballistics: Muzzle Velocity + Bullet Drop (Gravity) + Wind Deflection
+      2. Procedural Spring Recoil Physics (Hooke's Law + Damping)
+      3. Dynamic Muzzle Flash with Future Lighting Shadow Casting
+      4. Material-Aware Surface Reactions (Sparks, Splinters, Dust, Blood)
+      5. Weapon Sway and Inertia Lag
     ========================================================================================
 ]]
 
@@ -20,7 +20,7 @@ local WeaponsEngine = {}
 WeaponsEngine.__index = WeaponsEngine
 
 --------------------------------------------------------------------------------
--- 1. نموذج الزنبرك الفيزيائي للارتداد (PHYSICAL SPRING MODEL)
+-- 1. PHYSICAL SPRING RECOIL MODEL
 --------------------------------------------------------------------------------
 local Spring = {}
 Spring.__index = Spring
@@ -52,11 +52,11 @@ function Spring:Update(dt)
 end
 
 --------------------------------------------------------------------------------
--- 2. إعداد محرك الأسلحة
+-- 2. ENGINE INITIALIZATION
 --------------------------------------------------------------------------------
 function WeaponsEngine.new(config)
     local self = setmetatable({}, WeaponsEngine)
-    self.MuzzleVelocity = config.MuzzleVelocity or 850 -- أمتار/ثانية واقعية (Studs/sec)
+    self.MuzzleVelocity = config.MuzzleVelocity or 850 -- Studs/sec
     self.GravityMultiplier = config.GravityMultiplier or 1.2
     self.RecoilSpring = Spring.new(1, 65, 5.5, 5)
     self.IgnoreList = {config.Character}
@@ -64,14 +64,14 @@ function WeaponsEngine.new(config)
 end
 
 --------------------------------------------------------------------------------
--- 3. إطلاق رصاصة فيزيائية حقيقية (REAL-TIME BALLISTIC SIMULATION)
+-- 3. REAL-TIME BALLISTIC SIMULATION
 --------------------------------------------------------------------------------
 function WeaponsEngine:FireBullet(originCFrame, muzzlePart)
     local startPos = originCFrame.Position
     local direction = originCFrame.LookVector
     local velocity = direction * self.MuzzleVelocity
 
-    -- وميض إطلاق حقيقي يضيء الغرفة والبيئة المحيطة مع ظلال Future Lighting
+    -- Dynamic shadow-casting muzzle light flash
     if muzzlePart then
         local flashLight = Instance.new("PointLight")
         flashLight.Brightness = 4.5
@@ -79,22 +79,21 @@ function WeaponsEngine:FireBullet(originCFrame, muzzlePart)
         flashLight.Color = Color3.fromRGB(255, 205, 120)
         flashLight.Shadows = true
         flashLight.Parent = muzzlePart
-        Debris:AddItem(flashLight, 0.05) -- وميض سريع 50 ميلي ثانية
+        Debris:AddItem(flashLight, 0.05)
     end
 
-    -- دفع زنبرك الارتداد (ركلة للأعلى + اهتزاز عشوائي جانبي)
+    -- Apply spring recoil impulse (pitch kick + random yaw jitter)
     local pitchRecoil = math.rad(math.random(25, 45) / 10)
     local yawRecoil = math.rad(math.random(-15, 15) / 10)
     local kickbackZ = 0.25
     self.RecoilSpring:Impulse(Vector3.new(pitchRecoil, yawRecoil, kickbackZ))
 
-    -- محاكاة المقذوف في كل إطار فيزيائي
     local currentPos = startPos
     local bulletGravity = Vector3.new(0, -workspace.Gravity * self.GravityMultiplier, 0)
     local lifetime = 0
     local maxLifetime = 5.0
 
-    -- تتبع الرصاصة برسم مسار ضوئي Tracer واقعي
+    -- Create realistic bullet tracer
     local tracer = Instance.new("Part")
     tracer.Name = "BulletTracer"
     tracer.Size = Vector3.new(0.08, 0.08, 2.2)
@@ -114,12 +113,10 @@ function WeaponsEngine:FireBullet(originCFrame, muzzlePart)
             return
         end
 
-        -- تطبيق الجاذبية ومقاومة الرياح على مسار الرصاصة
         local windDeflection = workspace.GlobalWind * 0.04
         velocity = velocity + (bulletGravity + windDeflection) * dt
         local nextPos = currentPos + velocity * dt
 
-        -- فحص الاصطدام عبر Raycast مستمر من النقطة الحالية إلى التالية
         local raycastParams = RaycastParams.new()
         raycastParams.FilterType = RaycastFilterType.Exclude
         raycastParams.FilterDescendantsInstances = self.IgnoreList
@@ -127,13 +124,11 @@ function WeaponsEngine:FireBullet(originCFrame, muzzlePart)
 
         local result = workspace:Raycast(currentPos, nextPos - currentPos, raycastParams)
 
-        -- تحديث موقع وميل التريسر
         local segmentLength = (nextPos - currentPos).Magnitude
         tracer.Size = Vector3.new(0.08, 0.08, math.clamp(segmentLength, 0.8, 6))
         tracer.CFrame = CFrame.lookAt(nextPos, nextPos + velocity)
 
         if result then
-            -- ارتطام الرصاصة بالسطح!
             tracer:Destroy()
             connection:Disconnect()
             self:HandleSurfaceImpact(result)
@@ -145,7 +140,7 @@ function WeaponsEngine:FireBullet(originCFrame, muzzlePart)
 end
 
 --------------------------------------------------------------------------------
--- 4. فيزياء الارتطام بحسب نوع المادة (SURFACE-AWARE IMPACT REACTIONS)
+-- 4. SURFACE IMPACT REACTIONS
 --------------------------------------------------------------------------------
 function WeaponsEngine:HandleSurfaceImpact(raycastResult)
     local hitPos = raycastResult.Position
@@ -155,26 +150,20 @@ function WeaponsEngine:HandleSurfaceImpact(raycastResult)
 
     local surfaceLook = CFrame.lookAt(hitPos, hitPos + hitNormal)
 
-    -- فحص إذا كان الهدف شخصية (دم وإصابة)
     local hitModel = hitInstance:FindFirstAncestorOfClass("Model")
     local humanoid = hitModel and hitModel:FindFirstChildOfClass("Humanoid")
 
     if humanoid then
-        -- دماء وفيزياء إصابة حقيقية
         self:SpawnBloodImpact(hitPos, hitNormal)
-        humanoid:TakeDamage(34) -- ضرر واقعي
+        humanoid:TakeDamage(34)
         return
     end
 
-    -- تفاعلات الأسطح الصلبة
     if hitMaterial == Enum.Material.Metal or hitMaterial == Enum.Material.DiamondPlate then
-        -- شرار معدني متطاير + صوت ارتداد معدني
         self:SpawnMetalSparks(surfaceLook)
     elseif hitMaterial == Enum.Material.Wood or hitMaterial == Enum.Material.WoodPlanks then
-        -- شظايا خشبية
         self:SpawnWoodSplinters(surfaceLook)
     else
-        -- غبار وتراب متطاير للأراضي والصخور والخرسانة
         self:SpawnDustImpact(surfaceLook)
     end
 end
