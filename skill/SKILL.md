@@ -9,7 +9,9 @@ description: >
 user-invocable: true
 ---
 
-# 🤖 Roblox Hyper-Realism Studio: Autonomous AI Agent Protocol 4.0
+# 🤖 Roblox Hyper-Realism Studio: Autonomous AI Agent Protocol 4.5
+> **Created by:** `elyr` (Discord: `b84_`)  
+> **Engineering:** **Fully 80% AI Generated** by Autonomous Agentic AI
 
 This skill equips any AI Agent (Antigravity, Subagents, or LLM controllers) with the autonomous intelligence, procedural tools, and **physical desktop hands & live vision** needed to transform any Roblox game into next-generation AAA realism.
 
